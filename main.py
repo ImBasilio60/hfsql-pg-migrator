@@ -1,24 +1,20 @@
+"""
+Point d'entrée de l'export HFSQL.
+
+Lance l'export complet de la base HFSQL vers des fichiers CSV.
+Toute la logique se trouve dans le package exporter/.
+"""
+
 import sys
-import unicodedata
 
-from database import get_connection_hf
+from exporter import HfSqlExporter
 
-def get_tables_hf():
-    conn = get_connection_hf()
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-    if conn is None:
-        return []
 
-    try:
-        cursor = conn.cursor()
-        tables = cursor.tables(tableType="TABLE")
-        table_names = [table[1] for table in tables]
-        cursor.close()
-        conn.close()
-        return table_names
-    except Exception as e:
-        print("Erreur récupération tables HFSQL :", e)
-        return []
+def main():
+    HfSqlExporter().export_all()
+
 
 if __name__ == "__main__":
-    get_tables_hf()
+    main()
