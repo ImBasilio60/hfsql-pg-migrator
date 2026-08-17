@@ -21,3 +21,5 @@ Thumbs.db
 
 # Logs
 *.log
+
+export_hfsql/
