@@ -37,13 +37,21 @@ def _convert_timestamp(value):
         )
     return datetime.fromisoformat(value)
 
-def get_connection_hf():
+def get_connection_hf(database=None):
+    """Ouvre la connexion HFSQL et renvoie la connexion, None en cas d'erreur.
+
+    Le paramètre optionnel `database` remplace la valeur HFSQL_DATABASE du
+    .env : c'est ainsi que chaque entreprise est exportée depuis sa propre
+    base (MEGAPRINT=..., SLIMMO=..., MEGAPOWER=...). Sans paramètre, le
+    comportement historique est conservé (base du .env).
+    """
     try:
+        base = database or os.getenv("HFSQL_DATABASE")
         conn_str = (
             f"DRIVER={os.getenv('HFSQL_DRIVER')};"
             f"Server Name={os.getenv('HFSQL_SERVER')};"
             f"Server Port={os.getenv('HFSQL_PORT')};"
-            f"Database={os.getenv('HFSQL_DATABASE')};"
+            f"Database={base};"
             f"UID={os.getenv('HFSQL_UID')};"
             f"PWD={os.getenv('HFSQL_PWD')}"
         )
@@ -57,7 +65,7 @@ def get_connection_hf():
         print("Connexion HFSQL réussie")
 
         return conn
-    
+
     except Exception as e:
         print("Erreur de connexion HFSQL: ", e)
         return None

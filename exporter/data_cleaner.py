@@ -44,9 +44,16 @@ class DataCleaner:
     au BlobExporter ; cette classe ne doit pas écrire de fichiers.
     """
 
-    def __init__(self, blob_exporter=None):
-        """Prépare le nettoyeur avec l'exporteur de binaires."""
+    def __init__(self, blob_exporter=None, ignorer_blobs=False):
+        """Prépare le nettoyeur avec l'exporteur de binaires.
+
+        ignorer_blobs=True : les données binaires non décodables (photos...)
+        sont remplacées par une chaîne vide au lieu d'être extraites vers un
+        fichier. Les photos réelles vivent déjà dans backend_rh/data/
+        <entreprise>/photos/ et ne doivent jamais être touchées.
+        """
         self.blob_exporter = blob_exporter or BlobExporter()
+        self.ignorer_blobs = ignorer_blobs
 
     def clean(self, value, table_name, key, column):
         """
@@ -54,7 +61,8 @@ class DataCleaner:
 
         Les chaînes sont normalisées (GUID, RTF), les données binaires
         vides deviennent une chaîne vide, les binaires texte sont décodés
-        et les autres binaires sont extraits vers un fichier.
+        et les autres binaires sont extraits vers un fichier (sauf si
+        ignorer_blobs est actif : ils deviennent alors une chaîne vide).
         """
         if isinstance(value, str):
             return self._clean_text(value)
@@ -71,6 +79,9 @@ class DataCleaner:
 
         if text is not None:
             return text
+
+        if self.ignorer_blobs:
+            return ""
 
         return self.blob_exporter.export(
             data,
